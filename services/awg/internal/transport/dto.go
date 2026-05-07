@@ -3,8 +3,8 @@ package transport
 import "net/http"
 
 type message struct {
-	StatusCode int   `json:"status_code"`
-	Error      error `json:"error"`
+	StatusCode int    `json:"status_code"`
+	Error      string `json:"error"`
 }
 type response struct {
 	Message message `json:"message"`
@@ -12,30 +12,32 @@ type response struct {
 
 type request struct {
 	VirtualEndpoint string `json:"virtual_endpoint"`
-	FileName        string `json:"file_name"`
+	ID              int64  `json:"id"`
 }
 
-type createPeer struct {
+type createPeerResponse struct {
 	Message   message `json:"message"`
 	PublicKey string  `json:"public_key"`
-	FilePath  string  `json:"file_path"`
 }
 
-func newCreatePeer(publicKey, filePath string) createPeer {
-	return createPeer{
+func newCreatePeer(publicKey string) createPeerResponse {
+	return createPeerResponse{
 		Message: message{
 			StatusCode: http.StatusCreated,
 		},
 		PublicKey: publicKey,
-		FilePath:  filePath,
 	}
 }
 
-func newResp(statusCode int, error error) response {
+func newResp(statusCode int, err error) response {
+	errMsg := ""
+	if err != nil {
+		errMsg = err.Error()
+	}
 	return response{
 		Message: message{
 			StatusCode: statusCode,
-			Error:      error,
+			Error:      errMsg,
 		},
 	}
 }
